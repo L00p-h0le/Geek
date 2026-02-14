@@ -37,6 +37,16 @@ export function EthWallet({ mnemonic }: EthWalletProp) {
 
     const [sendDialogOpen, setSendDialogOpen] = useState(false);
 
+    const resetDialogState = () => {
+        setto("");
+        setamount("");
+        setTxStatus("idle");
+        setTxHash(null);
+        setErrorMessage(null);
+        setGasEstimate(null);
+        setGasCostEth(null);
+    };
+
     // UI state for custom modals/toasts
     const [toast, setToast] = useState<{
         message: string;
@@ -300,18 +310,7 @@ export function EthWallet({ mnemonic }: EthWalletProp) {
                         ))}
                     </div>
 
-                    {/* ─── Balance ─── */}
-                    <div className="mt-8 pt-6 border-t border-primary/20">
-                        <span className="text-xs font-mono text-primary uppercase tracking-wider">
-                            Balance
-                        </span>
-                        <div className="mt-1 flex items-baseline gap-2">
-                            <span className="text-3xl font-semibold tracking-tight text-text">
-                                {balance}
-                            </span>
-                            <span className="text-base font-mono text-accent/40">ETH</span>
-                        </div>
-                    </div>
+
 
                     {/* ─── Send ETH Button + Dialog ─── */}
                     <div className="mt-8">
@@ -319,7 +318,10 @@ export function EthWallet({ mnemonic }: EthWalletProp) {
                             variants={customExitVariants}
                             transition={{ type: "spring", stiffness: 300, damping: 25 }}
                             open={sendDialogOpen}
-                            onOpenChange={setSendDialogOpen}
+                            onOpenChange={(open) => {
+                                if (open) resetDialogState();
+                                setSendDialogOpen(open);
+                            }}
                         >
                             <DialogTrigger
                                 className="w-full py-3 text-base font-medium bg-text text-bg hover:bg-accent rounded-sm transition-all duration-200 cursor-pointer"

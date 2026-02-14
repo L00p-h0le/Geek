@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "motion/react";
 import { generateMnemonic } from "bip39";
 import { EthWallet } from "./components/Ethereum";
 import { SolanaWallet } from "./components/Solana";
@@ -41,16 +42,6 @@ function App() {
             <h1 className="text-2xl font-bold tracking-[0.4em] text-text">
               G33K
             </h1>
-            <button
-              onClick={() => setSelectedWallet(null)}
-              className="flex items-center gap-2 text-sm font-mono text-accent/50 hover:text-accent transition-colors duration-200 cursor-pointer"
-            >
-              Back
-              <svg className="w-4 h-4 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-
           </div>
         </header>
 
@@ -91,29 +82,74 @@ function App() {
       {/* ─── Main Content (fills remaining viewport) ─── */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 overflow-y-auto">
         <div className="w-full max-w-2xl">
-          {/* Heading */}
-          <div className="text-center mb-6">
-            <h2 className="text-xl font-mono uppercase tracking-[0.15em] text-accent/70 mb-2">
-              Recovery Phrase
-            </h2>
-            <p className="text-base text-primary font-mono">
-              This is 12-word BIP39 mnemonic Seed Phrase.
-            </p>
-          </div>
 
-          {/* Generate / Regenerate Button */}
-          <div className="flex justify-center mb-6">
-            <button
-              onClick={handleGenerate}
-              className="px-6 py-3 text-base font-medium bg-text text-bg hover:bg-accent rounded-sm transition-all duration-200 cursor-pointer"
-            >
-              {mnemonic ? "Regenerate" : "Generate Seed Phrase"}
-            </button>
-          </div>
+          {/* ─── Welcome Page (before seed phrase) ─── */}
+          {!mnemonic && (
+            <div className="flex flex-col items-center justify-center space-y-0">
+              <TextEffect
+                per="char"
+                delay={0.5}
+                as="h2"
+                className="text-4xl font-bold tracking-[0.25em] text-text mb-3"
+                variants={{
+                  container: {
+                    hidden: { opacity: 0 },
+                    visible: {
+                      opacity: 1,
+                      transition: { staggerChildren: 0.05 },
+                    },
+                  },
+                  item: {
+                    hidden: { opacity: 0, rotateX: 90, y: 10 },
+                    visible: {
+                      opacity: 1,
+                      rotateX: 0,
+                      y: 0,
+                      transition: { duration: 0.2 },
+                    },
+                  },
+                }}
+              >
+                Welcome to G33K
+              </TextEffect>
+              <TextEffect
+                per="char"
+                delay={1.5}
+                as="p"
+                className="text-lg tracking-[0.15em] text-primary font-mono"
+              >
+                Your personalized Wallet Generator
+              </TextEffect>
+              <motion.div
+                className="pt-12"
+                initial={{ opacity: 0, filter: "blur(12px)" }}
+                animate={{ opacity: 1, filter: "blur(0px)" }}
+                transition={{ delay: 2.5, duration: 0.6 }}
+              >
+                <button
+                  onClick={handleGenerate}
+                  className="px-8 py-4 text-base font-medium bg-text text-bg hover:bg-accent rounded-sm transition-all duration-200 cursor-pointer"
+                >
+                  Generate Seed Phrase
+                </button>
+              </motion.div>
+            </div>
+          )}
 
-          {/* Mnemonic display */}
+          {/* ─── Seed Phrase Page (after generation) ─── */}
           {mnemonic && (
             <div className="animate-fade-in-up">
+              {/* Recovery Phrase heading */}
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-mono uppercase tracking-[0.15em] text-accent/70 mb-2">
+                  Recovery Phrase
+                </h2>
+                <p className="text-base text-primary font-mono">
+                  This is 12-word BIP39 mnemonic Seed Phrase.
+                </p>
+              </div>
+
+              {/* Seed phrase grid */}
               <div className="relative bg-secondary/50 border border-primary/30 rounded-sm p-5 overflow-hidden">
                 <BorderTrail
                   style={{
@@ -145,51 +181,61 @@ function App() {
                   ))}
                 </div>
 
-                {/* Copy button */}
-                <button
-                  onClick={handleCopyMnemonic}
-                  className="mt-4 flex items-center gap-2 text-sm font-mono text-accent/50 hover:text-accent transition-colors duration-200 cursor-pointer"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                {/* Copy + Regenerate */}
+                <div className="mt-4 flex items-center justify-between">
+                  <button
+                    onClick={handleCopyMnemonic}
+                    className="flex items-center gap-2 text-sm font-mono text-accent/50 hover:text-accent transition-colors duration-200 cursor-pointer"
                   >
-                    <rect x="9" y="9" width="13" height="13" rx="2" strokeWidth="2" />
-                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" strokeWidth="2" />
-                  </svg>
-                  {copied ? "Copied to clipboard" : "Copy phrase"}
-                </button>
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" strokeWidth="2" />
+                      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" strokeWidth="2" />
+                    </svg>
+                    {copied ? "Copied to clipboard" : "Copy phrase"}
+                  </button>
+
+                  <button
+                    onClick={handleGenerate}
+                    className="text-sm font-mono text-accent/50 hover:text-accent transition-colors duration-200 cursor-pointer"
+                  >
+                    Regenerate
+                  </button>
+                </div>
               </div>
 
               {/* Warning sub-text */}
               <p className="mt-3 text-center text-sm font-mono text-red-400/70">
-                Losing this will result in wallet loss
+                Anyone with seed phrase will have access to your wallets. NEVER SHARE IT!!
               </p>
+
+              {/* ─── Wallet Selection ─── */}
+              <div className="flex flex-col items-center gap-4 mt-8 animate-fade-in-up">
+                <h2 className="text-base font-mono uppercase tracking-[0.15em] text-accent/50">
+                  Select Blockchain
+                </h2>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setSelectedWallet("ethereum")}
+                    className="px-8 py-3 text-base font-medium bg-text text-bg hover:bg-accent rounded-sm transition-all duration-200 cursor-pointer"
+                  >
+                    Ethereum
+                  </button>
+                  <button
+                    onClick={() => setSelectedWallet("solana")}
+                    className="px-8 py-3 text-base font-medium bg-text text-bg hover:bg-accent rounded-sm transition-all duration-200 cursor-pointer"
+                  >
+                    Solana
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* ─── Wallet Selection ─── */}
-          <div className="flex flex-col items-center gap-4 mt-8">
-            <h2 className="text-base font-mono uppercase tracking-[0.15em] text-accent/50">
-              Select Blockchain
-            </h2>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setSelectedWallet("ethereum")}
-                className="px-8 py-3 text-base font-medium bg-text text-bg hover:bg-accent rounded-sm transition-all duration-200 cursor-pointer"
-              >
-                Ethereum
-              </button>
-              <button
-                onClick={() => setSelectedWallet("solana")}
-                className="px-8 py-3 text-base font-medium bg-text text-bg hover:bg-accent rounded-sm transition-all duration-200 cursor-pointer"
-              >
-                Solana
-              </button>
-            </div>
-          </div>
         </div>
       </main>
 
